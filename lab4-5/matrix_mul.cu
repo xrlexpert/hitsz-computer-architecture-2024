@@ -1,4 +1,4 @@
-// #define USE_CUBLAS
+#define USE_CUBLAS
 
 #include <iostream>
 #include <cstdio>
@@ -103,7 +103,7 @@ __global__ void MatrixMulSharedMemKernel(float *A,
   // each thread writes one element
   int c = wB * BLOCK_SIZE * by + BLOCK_SIZE * bx;  // (by, bx) -> (by * BLOCKSIZE, bx * BLOCKSIZE) -> by * BLOCKSIZE * WB + bx * BLOCKSIZE
   if(c + ty * wB + tx  < wA * wB){
-      C[c + ty * wB + tx ] = Csub;
+      C[c + ty * wB + tx ] = round(Csub);
   }
 
 
@@ -292,9 +292,9 @@ int main(int argc, char* argv[])
   const float beta  = 0.0f;
   for (int j = 0; j < nIter; j++) {
     //matrixMulCPU(reference, h_M, h_N, m, k, n);
-    MatrixMulKernel<<<grid, block>>>(d_M, d_N, d_P, m);
-    //MatrixMulSharedMemKernel<<<grid, block>>>(d_M, d_N, d_P, m, n);
-    //cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n, m, k, &alpha, d_N, n, d_M, k, &beta, d_P, n);
+    // MatrixMulKernel<<<grid, block>>>(d_M, d_N, d_P, m);
+    // MatrixMulSharedMemKernel<<<grid, block>>>(d_M, d_N, d_P, m, n);
+    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n, m, k, &alpha, d_N, n, d_M, k, &beta, d_P, n);
   }
 
   cudaEventRecord(stop, 0);
